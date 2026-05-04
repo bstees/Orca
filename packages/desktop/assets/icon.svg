@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="#0A1628"/>
+
+  <!-- Orca body — white saddle patch -->
+  <ellipse cx="512" cy="560" rx="310" ry="220" fill="#FFFFFF"/>
+
+  <!-- Orca body — black -->
+  <ellipse cx="512" cy="490" rx="280" ry="210" fill="#1A2744"/>
+
+  <!-- White eye patch -->
+  <ellipse cx="600" cy="430" rx="68" ry="52" fill="#FFFFFF"/>
+
+  <!-- Eye -->
+  <circle cx="606" cy="432" r="22" fill="#0A1628"/>
+  <circle cx="614" cy="426" r="7" fill="#FFFFFF"/>
+
+  <!-- Dorsal fin -->
+  <path d="M 530 290 Q 580 180 640 200 Q 620 300 580 310 Z" fill="#1A2744"/>
+
+  <!-- Tail flukes -->
+  <path d="M 260 630 Q 200 700 180 760 Q 240 720 310 680 Z" fill="#1A2744"/>
+  <path d="M 300 650 Q 260 740 280 800 Q 340 750 370 690 Z" fill="#1A2744"/>
+
+  <!-- Pectoral fin -->
+  <path d="M 440 540 Q 360 620 340 680 Q 420 650 480 580 Z" fill="#1A2744"/>
+
+  <!-- Mouth / smile -->
+  <path d="M 520 530 Q 570 555 610 535" stroke="#0A1628" stroke-width="8" fill="none" stroke-linecap="round"/>
+
+  <!-- Subtle teal accent ring -->
+  <circle cx="512" cy="512" r="490" fill="none" stroke="#00C2CB" stroke-width="14" opacity="0.35"/>
+</svg>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.orca.server</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/bstees/work/orca/packages/server/src/index.js</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/bstees/work/orca/packages/server</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>ORCA_PORT</key>
+    <string>7337</string>
+    <key>ORCA_HOST</key>
+    <string>127.0.0.1</string>
+    <key>ORCA_DB_PATH</key>
+    <string>/Users/bstees/.orca/orca.db</string>
+    <key>NTFY_BASE_URL</key>
+    <string>https://ntfy.sh</string>
+    <key>NTFY_TOPIC</key>
+    <string>orca-alerts</string>
+    <key>NODE_ENV</key>
+    <string>production</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/bstees/.orca/server.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/bstees/.orca/server-error.log</string>
+</dict>
+</plist>

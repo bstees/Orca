@@ -1,0 +1,11 @@
+orc-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: color-mix(in srgb, var(--orc-badge-color) 15%, transparent);
+  color: var(--orc-badge-color);
+  border: 1px solid color-mix(in srgb, var(--orc-badge-color) 30%, transparent);
+}

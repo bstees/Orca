@@ -1,0 +1,40 @@
+{
+  "name": "@orca/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/extension.js",
+  "scripts": {
+    "test": "jest",
+    "build": "echo 'extension: no build step'",
+    "vscode:prepublish": "echo 'ready'"
+  },
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["onStartupFinished"],
+  "contributes": {
+    "configuration": {
+      "title": "Orca",
+      "properties": {
+        "orca.serverUrl": {
+          "type": "string",
+          "default": "ws://localhost:7337",
+          "description": "Orca server WebSocket URL"
+        },
+        "orca.idleSeconds": {
+          "type": "number",
+          "default": 30,
+          "description": "Seconds of inactivity before session is marked idle"
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.100.0"
+  },
+  "peerDependencies": {
+    "vscode": "*"
+  }
+}

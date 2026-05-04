@@ -1,0 +1,30 @@
+{
+  "name": "@orca/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Orca desktop app — system tray + embedded server + dashboard",
+  "author": "Orca contributors",
+  "type": "commonjs",
+  "main": "src/main.js",
+  "scripts": {
+    "generate-icons": "node scripts/generate-icons.js",
+    "bundle-server": "node scripts/bundle-server.js",
+    "rebuild-native": "electron-rebuild -f -w better-sqlite3",
+    "predev": "node scripts/generate-icons.js && node scripts/rebuild-native.js",
+    "dev": "electron .",
+    "prebuild": "node scripts/generate-icons.js && node scripts/bundle-server.js",
+    "build": "yarn workspace @orca/app build && electron-builder build --config electron-builder.config.cjs",
+    "build:mac": "yarn workspace @orca/app build && electron-builder build --mac --config electron-builder.config.cjs",
+    "build:win": "yarn workspace @orca/app build && electron-builder build --win --config electron-builder.config.cjs",
+    "build:linux": "yarn workspace @orca/app build && electron-builder build --linux --config electron-builder.config.cjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "electron": "35.7.5",
+    "electron-builder": "^25.0.0",
+    "esbuild": "^0.24.0",
+    "sharp": "^0.33.0"
+  }
+}
