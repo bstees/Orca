@@ -61,12 +61,21 @@ const registry = createSessionRegistry(db);
 
 registry.register({ sessionId, workspaceName, gitBranch, description }) → session
 registry.updateStatus(sessionId, status, message) → void
-registry.getAll() → session[]
+registry.getAll() → session[]   // returns Map insertion order — sort at the call site
 registry.get(sessionId) → session | undefined
 registry.remove(sessionId) → void
 ```
 
 Sessions are persisted to SQLite and replayed on server restart.
+
+**Important:** `getAll()` returns insertion order, not sorted order. Routes that need a sort order (e.g. most-recent first) must sort themselves:
+
+```js
+// api.js — correct pattern
+registry.getAll().sort((a, b) => b.registeredAt - a.registeredAt)
+```
+
+Do not add sorting to `getAll()` itself — sort at the call site.
 
 ---
 

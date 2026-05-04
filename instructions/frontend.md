@@ -26,6 +26,7 @@ src/components/ComponentName/
     </orc-session-card>
   );
   ```
+- **`class` vs `className`** — `<orc-*>` custom elements use `class`. All standard HTML elements (`<div>`, `<span>`, `<p>`, `<header>`, `<button>`, `<h1>`, `<main>`, etc.) use `className`. React console warnings about this are real bugs — fix them immediately.
 - Named exports only — no default exports.
 - PropTypes required for every prop. Destructure with defaults in function signature.
 - Pass `...rest` to the base element.

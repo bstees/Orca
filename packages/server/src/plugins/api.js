@@ -10,5 +10,7 @@ export async function apiPlugin(fastify, { registry }) {
     ts: Date.now(),
   }));
 
-  fastify.get('/api/sessions', async () => registry.getAll());
+  fastify.get('/api/sessions', async () =>
+    registry.getAll().sort((a, b) => b.registeredAt - a.registeredAt)
+  );
 }

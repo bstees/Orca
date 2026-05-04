@@ -15,12 +15,12 @@ export function AlertBanner({ sessions, alerts = [], ...rest }) {
 
   return (
     <orc-alert-banner class="alert-banner" {...rest}>
-      <span class="alert-banner__icon">🔔</span>
-      <span class="alert-banner__text">{text}</span>
+      <span className="alert-banner__icon">🔔</span>
+      <span className="alert-banner__text">{text}</span>
       {latestAlert?.options?.length > 0 && (
-        <span class="alert-banner__options">
+        <span className="alert-banner__options">
           {latestAlert.options.map((opt) => (
-            <button key={opt} class="alert-banner__option">{opt}</button>
+            <button key={opt} className="alert-banner__option">{opt}</button>
           ))}
         </span>
       )}

@@ -77,3 +77,7 @@ Mock `vscode` module in jest config:
 ```js
 moduleNameMapper: { '^vscode$': '<rootDir>/src/__mocks__/vscode.js' }
 ```
+
+Do not write tests that compare `Date.now()` timestamps for ordering unless you
+control the clock — these are inherently flaky when multiple operations complete
+within the same millisecond. Use mock timestamps or compare fields other than time.

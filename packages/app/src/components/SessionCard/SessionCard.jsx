@@ -7,14 +7,14 @@ export function SessionCard({ session, ...rest }) {
   const { workspaceName, gitBranch, status, message, registeredAt } = session;
   return (
     <orc-session-card class="session-card" data-status={status} {...rest}>
-      <div class="session-card__header">
-        <span class="session-card__workspace">{workspaceName}</span>
+      <div className="session-card__header">
+        <span className="session-card__workspace">{workspaceName}</span>
         <StatusBadge status={status} />
       </div>
-      <div class="session-card__branch">⎇ {gitBranch}</div>
-      {message && <div class="session-card__message">{message}</div>}
-      <div class="session-card__footer">
-        <span class="session-card__elapsed">{elapsedSince(registeredAt)} ago</span>
+      <div className="session-card__branch">⎇ {gitBranch}</div>
+      {message && <div className="session-card__message">{message}</div>}
+      <div className="session-card__footer">
+        <span className="session-card__elapsed">{elapsedSince(registeredAt)} ago</span>
       </div>
     </orc-session-card>
   );

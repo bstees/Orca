@@ -7,6 +7,15 @@ human input — triggering push notifications (ntfy.sh) and a real-time dashboar
 
 ---
 
+## Starting a Session
+
+1. Read `/memories/session/plan.md` first — it has settled decisions and next steps.
+2. Run `yarn test` — all 276 tests must pass before you change anything.
+3. Do **not** ask the user about anything already decided in these instruction files or the plan. Check the files first.
+4. Prioritise eliminating feedback blockages — if you can get a non-human signal (running a script, checking a test, reading a log file), do that before asking a human.
+
+---
+
 ## Stack & Constraints
 
 - **Language:** Plain JavaScript only. No TypeScript, no `.ts` files, no `tsc`.
@@ -27,6 +36,7 @@ packages/
   server/     — Fastify + MCP + WebSocket + SQLite
   extension/  — VS Code extension (CommonJS)
   app/        — React + Capacitor dashboard
+  desktop/    — Electron wrapper (server + app in one binary)
 scripts/      — feedback harness scripts (probe-mcp.js, mock-extension.js, test-ntfy.js)
 instructions/ — this file + per-domain instruction files
 docs/         — log-format.md and other reference docs

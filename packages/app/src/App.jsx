@@ -14,11 +14,11 @@ export default function App() {
 
   return (
     <orc-app class="app">
-      <header class="app__header">
-        <h1 class="app__title">Orca {IS_DEMO && <span class="app__demo-badge">demo</span>}</h1>
-        <span class="app__connection">{socket.connected ? '● Connected' : '○ Connecting…'}</span>
+      <header className="app__header">
+        <h1 className="app__title">Orca {IS_DEMO && <span className="app__demo-badge">demo</span>}</h1>
+        <span className="app__connection">{socket.connected ? '● Connected' : '○ Connecting…'}</span>
       </header>
-      <main class="app__main">
+      <main className="app__main">
         <AlertBanner alerts={alerts} sessions={sessions} />
         <SessionsList sessions={sessions} />
       </main>

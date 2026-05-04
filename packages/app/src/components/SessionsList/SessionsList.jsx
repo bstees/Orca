@@ -6,7 +6,7 @@ export function SessionsList({ sessions, ...rest }) {
   if (!sessions.length) {
     return (
       <orc-sessions-list class="sessions-list sessions-list--empty" {...rest}>
-        <p class="sessions-list__empty-text">No active sessions</p>
+        <p className="sessions-list__empty-text">No active sessions</p>
       </orc-sessions-list>
     );
   }
