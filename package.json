@@ -1,12 +1,31 @@
 {
   "name": "orca",
   "private": true,
-  "workspaces": ["packages/*"],
+  "workspaces": {
+    "packages": ["packages/*"],
+    "nohoist": [
+      "@orca/mobile/babel-preset-expo",
+      "@orca/mobile/babel-preset-expo/**",
+      "@orca/mobile/expo",
+      "@orca/mobile/expo/**",
+      "@orca/mobile/expo-*",
+      "@orca/mobile/expo-*/**",
+      "@orca/mobile/@expo",
+      "@orca/mobile/@expo/**",
+      "@orca/mobile/react-native",
+      "@orca/mobile/react-native/**",
+      "@orca/mobile/@react-native",
+      "@orca/mobile/@react-native/**",
+      "@orca/mobile/jest-expo",
+      "@orca/mobile/jest-expo/**"
+    ]
+  },
   "type": "module",
   "scripts": {
     "dev": "yarn workspace @orca/server dev",
     "dev:app": "yarn workspace @orca/app dev",
     "dev:desktop": "ORCA_DEV=1 yarn workspace @orca/desktop dev",
+    "dev:mobile": "yarn workspace @orca/mobile start",
     "build": "yarn workspaces foreach --all run build",
     "test": "jest",
     "mutate": "yarn workspaces foreach --all --exclude @orca/extension run mutate",
@@ -39,6 +58,8 @@
     "jest-css-modules-transform": "^4.4.2",
     "jest-environment-jsdom": "^30.0.0",
     "prettier": "^3.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "prop-types": "^15.8.1",
     "stylelint": "^16.9.0",
     "stylelint-config-prettier": "^9.0.5",
