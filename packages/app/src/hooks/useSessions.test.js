@@ -250,4 +250,39 @@ describe('useSessions', () => {
 
     expect(result.current.alerts).toHaveLength(0);
   });
+
+  test('alert_response marks session working with response text', () => {
+    const { result, rerender } = renderHook(({ msg }) => useSessions({ lastMessage: msg }), {
+      initialProps: { msg: null },
+    });
+
+    act(() => { rerender({ msg: snapshot }); });
+    act(() => { rerender({ msg: { type: 'alert_response', sessionId: statusUpdate.sessionId, option: 'Approve', ts: 1700000000000 } }); });
+
+    const updated = result.current.sessions.find((s) => s.sessionId === statusUpdate.sessionId);
+    expect(updated.status).toBe('working');
+    expect(updated.message).toBe('Response: Approve');
+    expect(updated.updatedAt).toBe(1700000000000);
+  });
+
+  test('approval_mode_changed updates only the target session approvalMode', () => {
+    const { result, rerender } = renderHook(({ msg }) => useSessions({ lastMessage: msg }), {
+      initialProps: { msg: null },
+    });
+
+    act(() => { rerender({ msg: snapshot }); });
+    const targetId = snapshot.sessions[0].sessionId;
+
+    act(() => {
+      rerender({ msg: { type: 'approval_mode_changed', sessionId: targetId, approvalMode: 'autopilot', ts: Date.now() } });
+    });
+
+    const updated = result.current.sessions.find((s) => s.sessionId === targetId);
+    expect(updated.approvalMode).toBe('autopilot');
+
+    // Other sessions unchanged
+    result.current.sessions
+      .filter((s) => s.sessionId !== targetId)
+      .forEach((s) => expect(s.approvalMode).not.toBe('autopilot'));
+  });
 });

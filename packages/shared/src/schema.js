@@ -9,6 +9,7 @@
  * @property {string} workspaceName - Human-readable workspace name
  * @property {string} gitBranch     - Current git branch
  * @property {string} description   - Brief description of what this session is doing
+ * @property {string|null} [approvalMode] - VS Code Copilot approval mode (`chat.permissions.default`)
  * @property {number} registeredAt  - Unix timestamp (ms)
  */
 

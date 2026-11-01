@@ -13,6 +13,7 @@ const working = MOCK_SESSIONS.filter((s) => s.status === 'working');
 export const OneNeedsInput = { args: { sessions: needsInput } };
 export const MultipleBlocking = { args: { sessions: [...needsInput, ...blocked] } };
 export const NoneBlocking = { args: { sessions: working } };
+export const Finished = { args: { sessions: MOCK_SESSIONS.filter((s) => s.status === 'done') } };
 export const WithAlerts = {
   args: {
     sessions: MOCK_SESSIONS,

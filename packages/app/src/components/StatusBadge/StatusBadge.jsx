@@ -6,7 +6,8 @@ export function StatusBadge({ status, ...rest }) {
   const { label, color } = getStatusDisplay(status);
   return (
     <orc-status-badge
-      class="status-badge"
+      className="status-badge"
+      data-status={status}
       style={{ '--orc-badge-color': color }}
       {...rest}
     >

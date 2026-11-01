@@ -1,0 +1,31 @@
+{
+  "name": "@orca/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@orca/shared": "*",
+    "expo": "~54.0.0",
+    "expo-linear-gradient": "^55.0.13",
+    "expo-notifications": "~0.32.0",
+    "expo-status-bar": "~3.0.0",
+    "phosphor-react-native": "^3.0.6",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-svg": "~15.12.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@testing-library/react-native": "^13.0.0",
+    "babel-jest": "^29.7.0",
+    "jest": "~29.7.0",
+    "jest-expo": "~54.0.0",
+    "react-test-renderer": "^19.0.0"
+  }
+}

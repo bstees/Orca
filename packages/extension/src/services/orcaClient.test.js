@@ -160,6 +160,66 @@ describe('createOrcaClient', () => {
     expect(onMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'ping' }));
   });
 
+  it('stores sessionId from session_ack message', () => {
+    const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
+    client.connect();
+    MockWS.__lastInstance.triggerOpen();
+
+    expect(client.getSessionId()).toBeNull();
+
+    MockWS.__lastInstance.simulateMessage({ type: 'session_ack', sessionId: 'xyz-123' });
+
+    expect(client.getSessionId()).toBe('xyz-123');
+  });
+
+  it('also calls message handler for session_ack', () => {
+    const onMessage = jest.fn();
+    const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
+    client.onMessage(onMessage);
+    client.connect();
+    MockWS.__lastInstance.triggerOpen();
+
+    MockWS.__lastInstance.simulateMessage({ type: 'session_ack', sessionId: 'xyz-123' });
+
+    expect(onMessage).toHaveBeenCalledWith(expect.objectContaining({ type: 'session_ack', sessionId: 'xyz-123' }));
+  });
+
+  it('calls onConnect handler on initial open', () => {
+    const onConnect = jest.fn();
+    const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
+    client.onConnect(onConnect);
+    client.connect();
+    MockWS.__lastInstance.triggerOpen();
+    expect(onConnect).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onConnect handler again on reconnect', () => {
+    const onConnect = jest.fn();
+    const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
+    client.onConnect(onConnect);
+    client.connect();
+    MockWS.__lastInstance.triggerOpen();
+
+    MockWS.__lastInstance.simulateDisconnect();
+    jest.advanceTimersByTime(1100);
+    MockWS.__lastInstance.triggerOpen();
+
+    expect(onConnect).toHaveBeenCalledTimes(2);
+  });
+
+  it('resets sessionId to null on reconnect before session_ack', () => {
+    const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
+    client.connect();
+    MockWS.__lastInstance.triggerOpen();
+    MockWS.__lastInstance.simulateMessage({ type: 'session_ack', sessionId: 'old-id' });
+    expect(client.getSessionId()).toBe('old-id');
+
+    MockWS.__lastInstance.simulateDisconnect();
+    jest.advanceTimersByTime(1100);
+    MockWS.__lastInstance.triggerOpen();
+    expect(client.getSessionId()).toBeNull();
+  });
+
   it('disconnect() prevents reconnect after socket closes', () => {
     const client = createOrcaClient({ serverUrl: 'ws://127.0.0.1:7337' });
     client.connect();

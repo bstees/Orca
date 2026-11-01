@@ -55,6 +55,14 @@ describe('createSessionRegistry', () => {
     expect(registry.getAll()).toHaveLength(0);
   });
 
+  test('clear removes all sessions', () => {
+    const registry = makeRegistry();
+    registry.register({ workspaceName: 'ws-a', gitBranch: 'main' });
+    registry.register({ workspaceName: 'ws-b', gitBranch: 'dev' });
+    registry.clear();
+    expect(registry.getAll()).toHaveLength(0);
+  });
+
   test('persists sessions across re-opens of the same db', () => {
     const db = new Database(':memory:');
     const r1 = createSessionRegistry(db);
@@ -62,5 +70,65 @@ describe('createSessionRegistry', () => {
 
     const r2 = createSessionRegistry(db);
     expect(r2.getAll().some((s) => s.workspaceName === 'persisted-ws')).toBe(true);
+  });
+
+  test('setPrompt stores a pending prompt in memory', () => {
+    const registry = makeRegistry();
+    const { sessionId } = registry.register({ workspaceName: 'ws', gitBranch: 'main' });
+    registry.setPrompt(sessionId, 'Write unit tests for the auth module');
+    expect(registry.get(sessionId).pendingPrompt).toBe('Write unit tests for the auth module');
+  });
+
+  test('clearPrompt removes the pending prompt', () => {
+    const registry = makeRegistry();
+    const { sessionId } = registry.register({ workspaceName: 'ws', gitBranch: 'main' });
+    registry.setPrompt(sessionId, 'Do something');
+    registry.clearPrompt(sessionId);
+    expect(registry.get(sessionId).pendingPrompt).toBeNull();
+  });
+
+  test('setPrompt queues multiple prompts; clearPrompt dequeues FIFO', () => {
+    const registry = makeRegistry();
+    const { sessionId } = registry.register({ workspaceName: 'ws', gitBranch: 'main' });
+    registry.setPrompt(sessionId, 'First prompt');
+    registry.setPrompt(sessionId, 'Second prompt');
+    expect(registry.get(sessionId).pendingPrompt).toBe('First prompt');
+    registry.clearPrompt(sessionId);
+    expect(registry.get(sessionId).pendingPrompt).toBe('Second prompt');
+    registry.clearPrompt(sessionId);
+    expect(registry.get(sessionId).pendingPrompt).toBeNull();
+  });
+
+  test('register stores approvalMode when provided', () => {
+    const registry = makeRegistry();
+    const session = registry.register({ workspaceName: 'ws', gitBranch: 'main', approvalMode: 'bypass' });
+    expect(session.approvalMode).toBe('bypass');
+    expect(registry.get(session.sessionId).approvalMode).toBe('bypass');
+  });
+
+  test('register defaults approvalMode to null when not provided', () => {
+    const registry = makeRegistry();
+    const session = registry.register({ workspaceName: 'ws', gitBranch: 'main' });
+    expect(session.approvalMode).toBeNull();
+  });
+
+  test('updateApprovalMode changes approvalMode in cache and db', () => {
+    const registry = makeRegistry();
+    const { sessionId } = registry.register({ workspaceName: 'ws', gitBranch: 'main', approvalMode: 'default' });
+    registry.updateApprovalMode(sessionId, 'autopilot');
+    expect(registry.get(sessionId).approvalMode).toBe('autopilot');
+  });
+
+  test('updateApprovalMode emits approval_mode_changed event', () => {
+    const EventEmitter = require('node:events');
+    const db = require('better-sqlite3')(':memory:');
+    const { createSessionRegistry } = require('../registry/sessions.js');
+    const emitter = new EventEmitter();
+    const registry = createSessionRegistry(db, emitter);
+    const { sessionId } = registry.register({ workspaceName: 'ws', gitBranch: 'main' });
+    const handler = jest.fn();
+    emitter.on('approval_mode_changed', handler);
+    registry.updateApprovalMode(sessionId, 'bypass');
+    expect(handler).toHaveBeenCalledWith(expect.objectContaining({ sessionId, approvalMode: 'bypass' }));
   });
 });

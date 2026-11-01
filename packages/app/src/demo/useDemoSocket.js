@@ -13,12 +13,16 @@ import { MOCK_WS_STREAM } from '@orca/shared';
  */
 export function useDemoSocket() {
   const [connected, setConnected] = useState(false);
+  const [socketStatus, setSocketStatus] = useState('connecting');
   const [lastMessage, setLastMessage] = useState(null);
   const timers = useRef([]);
 
   useEffect(() => {
     // Small startup delay to simulate connection
-    const connectTimer = setTimeout(() => setConnected(true), 200);
+    const connectTimer = setTimeout(() => {
+      setConnected(true);
+      setSocketStatus('connected');
+    }, 200);
 
     // Schedule each stream event
     const eventTimers = MOCK_WS_STREAM.map(({ delayMs, payload }) =>
@@ -52,5 +56,5 @@ export function useDemoSocket() {
     // No-op in demo mode — nothing to send
   }, []);
 
-  return { connected, lastMessage, send };
+  return { connected, socketStatus, lastMessage, send };
 }

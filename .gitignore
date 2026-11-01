@@ -24,6 +24,12 @@ package-lock.json
 
 .playwright-mcp/
 *.code-workspace
+.vscode/
+
+# Local runtime and packaged artifacts
+packages/server/*.db
+packages/mobile/.expo/
+*.vsix
 
 # Electron-specific native module build
 packages/desktop/.native-electron/

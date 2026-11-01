@@ -2,7 +2,7 @@
 const path = require('node:path');
 const { BrowserWindow, shell, app } = require('electron');
 
-const DASHBOARD_DEV_URL = `http://127.0.0.1:${process.env.VITE_PORT ?? '5173'}`;
+const DASHBOARD_DEV_URL = `http://127.0.0.1:${process.env.VITE_PORT ?? '4000'}`;
 
 function getDashboardDistPath() {
   // In packaged app, extraResources land in process.resourcesPath

@@ -1,0 +1,6 @@
+**/__mocks__/**
+**/*.test.js
+jest.config.cjs
+node_modules/**
+src/**
+esbuild.js

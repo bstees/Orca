@@ -2,12 +2,13 @@ import { getStatusDisplay, isActionRequired } from './status.js';
 
 describe('getStatusDisplay', () => {
   test.each([
-    ['registered', 'Registered', '#6b7280'],
-    ['working', 'Working', '#2563eb'],
-    ['idle', 'Idle', '#d97706'],
-    ['blocked', 'Blocked', '#dc2626'],
-    ['needs_input', 'Needs Input', '#7c3aed'],
-    ['done', 'Done', '#16a34a'],
+    ['registered', 'Registered', '#7a8fa6'],
+    ['working', 'Working', '#3ba3e0'],
+    ['idle', 'Ready', '#f59e0b'],
+    ['blocked', 'Blocked', '#f87171'],
+    ['needs_input', 'Needs Input', '#60a5fa'],
+    ['responded', 'Responded', '#a78bfa'],
+    ['done', 'Done', '#34d399'],
   ])('status="%s" → label="%s" color="%s"', (status, label, color) => {
     const result = getStatusDisplay(status);
     expect(result.label).toBe(label);
@@ -16,7 +17,7 @@ describe('getStatusDisplay', () => {
 
   test('unknown status returns grey fallback', () => {
     const result = getStatusDisplay('flying');
-    expect(result.color).toBe('#6b7280');
+    expect(result.color).toBe('#7a8fa6');
     expect(result.label).toBe('flying');
   });
 });

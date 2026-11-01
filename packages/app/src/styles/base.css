@@ -1,16 +1,23 @@
 :root {
-  --orc-text: #111827;
-  --orc-text-muted: #6b7280;
-  --orc-surface: #ffffff;
-  --orc-surface-alt: #f9fafb;
-  --orc-border: #e5e7eb;
-  --orc-accent: #7c3aed;
+  /* Ocean dark palette */
+  --orc-bg:            #0a0e14;
+  --orc-surface:       #111820;
+  --orc-surface-alt:   #161e28;
+  --orc-surface-glass: rgba(16, 26, 38, 0.72);
+  --orc-border:        rgba(255, 255, 255, 0.08);
+  --orc-border-strong: rgba(255, 255, 255, 0.16);
+  --orc-text:          #e8ecf0;
+  --orc-text-muted:    #7a8fa6;
+  --orc-accent:        #1e6fa8;      /* ocean blue */
+  --orc-accent-bright: #3ba3e0;     /* lighter blue highlight */
+  --orc-accent-glow:   rgba(59, 163, 224, 0.18);
+  --orc-header-h:      57px;
 
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--orc-text);
-  background: var(--orc-surface-alt);
+  background: var(--orc-bg);
 }
 
 *, *::before, *::after {
@@ -30,19 +37,58 @@ orc-app {
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background: var(--orc-surface);
+  background: var(--orc-surface-glass);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
   border-bottom: 1px solid var(--orc-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--orc-header-h);
 }
 
 .app__title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--orc-accent);
+  color: var(--orc-text);
+  letter-spacing: -0.01em;
+}
+
+@keyframes orc-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
 }
 
 .app__connection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.75rem;
   color: var(--orc-text-muted);
+}
+
+.app__connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.app__connection--connected {
+  color: #34d399;
+}
+
+.app__connection--disconnected {
+  color: #f87171;
+}
+
+.app__connection--connecting {
+  color: var(--orc-accent-bright, #3ba3e0);
+}
+
+.app__connection--connecting .app__connection-dot {
+  animation: orc-pulse 1.2s ease-in-out infinite;
 }
 
 .app__main {

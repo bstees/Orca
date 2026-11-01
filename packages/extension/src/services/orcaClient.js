@@ -18,6 +18,8 @@ function createOrcaClient({ serverUrl }) {
   let queue = [];
   let statusHandler = null;
   let messageHandler = null;
+  let connectHandler = null;
+  let sessionId = null;
 
   function notifyStatus(connected) {
     statusHandler?.(connected);
@@ -34,13 +36,19 @@ function createOrcaClient({ serverUrl }) {
 
     ws.on('open', () => {
       backoffMs = INITIAL_BACKOFF_MS;
+      sessionId = null; // reset — will be re-assigned from session_ack
       notifyStatus(true);
+      connectHandler?.();
       drain();
     });
 
     ws.on('message', (data) => {
       try {
-        messageHandler?.(JSON.parse(data.toString()));
+        const msg = JSON.parse(data.toString());
+        if (msg.type === 'session_ack' && msg.sessionId) {
+          sessionId = msg.sessionId;
+        }
+        messageHandler?.(msg);
       } catch {
         // ignore malformed
       }
@@ -79,6 +87,14 @@ function createOrcaClient({ serverUrl }) {
       } else {
         queue.push(msg);
       }
+    },
+
+    getSessionId() {
+      return sessionId;
+    },
+
+    onConnect(handler) {
+      connectHandler = handler;
     },
 
     onStatusChange(handler) {

@@ -9,3 +9,7 @@ orc-status-badge {
   color: var(--orc-badge-color);
   border: 1px solid color-mix(in srgb, var(--orc-badge-color) 30%, transparent);
 }
+
+orc-status-badge[data-status='working'] {
+  animation: orc-pulse 1.2s ease-in-out infinite;
+}

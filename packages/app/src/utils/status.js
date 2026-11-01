@@ -6,14 +6,15 @@
  */
 export function getStatusDisplay(status) {
   const map = {
-    registered: { label: 'Registered', color: '#6b7280' },
-    working: { label: 'Working', color: '#2563eb' },
-    idle: { label: 'Idle', color: '#d97706' },
-    blocked: { label: 'Blocked', color: '#dc2626' },
-    needs_input: { label: 'Needs Input', color: '#7c3aed' },
-    done: { label: 'Done', color: '#16a34a' },
+    registered: { label: 'Registered', color: '#7a8fa6' },
+    working:    { label: 'Working',    color: '#3ba3e0' },
+    idle:       { label: 'Ready',      color: '#f59e0b' },
+    blocked:    { label: 'Blocked',    color: '#f87171' },
+    needs_input:{ label: 'Needs Input',color: '#60a5fa' },
+    responded:  { label: 'Responded', color: '#a78bfa' },
+    done:       { label: 'Done',       color: '#34d399' },
   };
-  return map[status] ?? { label: status, color: '#6b7280' };
+  return map[status] ?? { label: status, color: '#7a8fa6' };
 }
 
 /**

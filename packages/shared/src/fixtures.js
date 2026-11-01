@@ -18,27 +18,29 @@ export const FIXTURE_EPOCH = 1736935200000;
 export const MOCK_SESSIONS = [
   {
     sessionId: 'sess-alpha-001',
-    workspaceName: 'orca',
+    workspaceName: '[demo] orca',
     gitBranch: 'feat/dashboard',
     description: 'Building the real-time Orca dashboard and WebSocket bridge',
     status: SESSION_STATUS.WORKING,
     message: 'Writing SessionCard component',
+    approvalMode: 'default',
     registeredAt: FIXTURE_EPOCH - 45 * 60 * 1000,        // 45 min ago
     updatedAt: FIXTURE_EPOCH - 2 * 60 * 1000,             // 2 min ago
   },
   {
     sessionId: 'sess-beta-002',
-    workspaceName: 'api-service',
+    workspaceName: '[demo] api-service',
     gitBranch: 'fix/auth-tokens',
     description: 'Fixing JWT expiry bug in the auth middleware',
     status: SESSION_STATUS.NEEDS_INPUT,
     message: 'Should the token TTL be 15 min or 1 hour? Waiting for decision.',
+    approvalMode: 'bypass',
     registeredAt: FIXTURE_EPOCH - 90 * 60 * 1000,        // 90 min ago
     updatedAt: FIXTURE_EPOCH - 5 * 60 * 1000,             // 5 min ago
   },
   {
     sessionId: 'sess-gamma-003',
-    workspaceName: 'docs',
+    workspaceName: '[demo] docs',
     gitBranch: 'docs/api-reference',
     description: 'Generating API reference from OpenAPI spec',
     status: SESSION_STATUS.IDLE,
@@ -48,7 +50,7 @@ export const MOCK_SESSIONS = [
   },
   {
     sessionId: 'sess-delta-004',
-    workspaceName: 'infra',
+    workspaceName: '[demo] infra',
     gitBranch: 'chore/upgrade-k8s',
     description: 'Upgrading Kubernetes manifests to 1.30',
     status: SESSION_STATUS.BLOCKED,
@@ -106,7 +108,7 @@ export const MOCK_WS_STREAM = [
     payload: {
       type: 'session_registered',
       sessionId: 'sess-zeta-006',
-      workspaceName: 'payments',
+      workspaceName: '[demo] payments',
       gitBranch: 'feat/stripe-webhooks',
       description: 'Adding Stripe webhook handler',
       ts: FIXTURE_EPOCH + 5000,
@@ -140,7 +142,7 @@ export const MOCK_WS_STREAM = [
     payload: {
       type: 'alert_notification',
       sessionId: 'sess-delta-004',
-      message: 'Helm upgrade is blocked — need you to review the diff and approve',
+      message: '[demo] Helm upgrade is blocked — need you to review the diff and approve',
       options: ['Approve', 'Skip for now', 'Open PR'],
       ts: FIXTURE_EPOCH + 13000,
     },

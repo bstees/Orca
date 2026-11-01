@@ -2,6 +2,7 @@ import { pathToFileURL } from 'node:url';
 import Fastify from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import Database from 'better-sqlite3';
+import { EventEmitter } from 'node:events';
 
 import { loadConfig } from './config.js';
 import { createSessionRegistry } from './registry/sessions.js';
@@ -23,9 +24,11 @@ export async function createApp(configOverride) {
   const config = configOverride ?? loadConfig();
 
   const db = new Database(config.dbPath);
-  const registry = createSessionRegistry(db);
+  const events = new EventEmitter();
+  const registry = createSessionRegistry(db, events);
+  registry.clear(); // Purge stale sessions from previous server runs
   const notifier = createNtfyNotifier(config.ntfy);
-  const mcpServer = createMcpServer(registry, notifier);
+  const mcpServer = createMcpServer(registry, notifier, events);
 
   const fastify = Fastify({ logger: true });
 
@@ -33,7 +36,7 @@ export async function createApp(configOverride) {
   fastify.decorate('config', config);
 
   await fastify.register(fastifyWebsocket);
-  await fastify.register(websocketPlugin, { registry });
+  await fastify.register(websocketPlugin, { registry, events, notifier });
   await fastify.register(mcpPlugin, { mcpServer });
   await fastify.register(apiPlugin, { registry });
   await fastify.register(staticPlugin);

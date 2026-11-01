@@ -1,4 +1,26 @@
 /**
+ * VS Code Copilot approval mode enum.
+ * Maps to the `chat.permissions.default` VS Code setting.
+ * @readonly
+ * @enum {string}
+ */
+export const APPROVAL_MODES = Object.freeze({
+  DEFAULT: 'default',
+  BYPASS: 'bypass',
+  AUTOPILOT: 'autopilot',
+});
+
+/**
+ * Human-readable labels for each approval mode.
+ * @type {Record<string, string>}
+ */
+export const APPROVAL_MODE_LABELS = Object.freeze({
+  default: 'Default Approvals',
+  bypass: 'Bypass Approvals',
+  autopilot: 'Autopilot',
+});
+
+/**
  * Session status enum.
  * @readonly
  * @enum {string}
@@ -9,11 +31,12 @@ export const SESSION_STATUS = Object.freeze({
   IDLE: 'idle',
   BLOCKED: 'blocked',
   NEEDS_INPUT: 'needs_input',
+  RESPONDED: 'responded',
   DONE: 'done',
 });
 
 /**
- * @typedef {'registered'|'working'|'idle'|'blocked'|'needs_input'|'done'} SessionStatus
+ * @typedef {'registered'|'working'|'idle'|'blocked'|'needs_input'|'responded'|'done'} SessionStatus
  */
 
 /**

@@ -11,15 +11,20 @@ const RECONNECT_DELAY_MS = 3000;
  */
 export function useOrcaSocket(url) {
   const [connected, setConnected] = useState(false);
+  const [socketStatus, setSocketStatus] = useState('connecting');
   const [lastMessage, setLastMessage] = useState(null);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
   const connect = useCallback(() => {
+    setSocketStatus('connecting');
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
-    ws.addEventListener('open', () => setConnected(true));
+    ws.addEventListener('open', () => {
+      setConnected(true);
+      setSocketStatus('connected');
+    });
 
     ws.addEventListener('message', (event) => {
       try {
@@ -31,6 +36,7 @@ export function useOrcaSocket(url) {
 
     ws.addEventListener('close', () => {
       setConnected(false);
+      setSocketStatus('disconnected');
       reconnectTimer.current = setTimeout(connect, RECONNECT_DELAY_MS);
     });
 
@@ -53,5 +59,5 @@ export function useOrcaSocket(url) {
     }
   }, []);
 
-  return { connected, lastMessage, send };
+  return { connected, socketStatus, lastMessage, send };
 }
