@@ -20,6 +20,28 @@
       "@orca/mobile/jest-expo/**"
     ]
   },
+  "resolutions": {
+    "@babel/core": "^7.29.7",
+    "@babel/plugin-transform-modules-systemjs": "^7.29.7",
+    "@xmldom/xmldom": "^0.9.12",
+    "baseline-browser-mapping": "^2.11.0",
+    "brace-expansion": "^5.0.6",
+    "body-parser": "^2.4.0",
+    "browserslist": "^4.28.7",
+    "compression": "^1.8.2",
+    "fast-uri": "^3.1.9",
+    "hono": "^4.13.11",
+    "ip-address": "^10.7.4",
+    "js-yaml": "^4.3.2",
+    "postcss": "^8.5.23",
+    "postcss-selector-parser": "^6.1.5",
+    "proxy-addr": "^2.0.8",
+    "qs": "^6.16.1",
+    "shell-quote": "^1.9.0",
+    "source-map-js": "^1.2.2",
+    "ws": "^8.22.1",
+    "zod": "^4.6.7"
+  },
   "type": "module",
   "scripts": {
     "dev": "yarn workspace @orca/server dev",
@@ -33,11 +55,11 @@
     "lint-fix": "eslint --fix 'packages/*/src/**/*.{js,jsx}'"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
+    "@babel/core": "^7.29.7",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/plugin-syntax-jsx": "^7.24.7",
     "@babel/plugin-transform-modules-commonjs": "^7.24.8",
-    "@babel/preset-env": "^7.25.3",
+    "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.24.7",
     "@eslint/js": "^9.9.0",
     "@modelcontextprotocol/sdk": "^1.32.2",
@@ -64,7 +86,7 @@
     "stylelint": "^16.9.0",
     "stylelint-config-standard": "^37.0.0",
     "ws": "^8.22.1",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "engines": {
     "node": ">=22.0.0"
