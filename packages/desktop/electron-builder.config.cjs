@@ -57,7 +57,6 @@ module.exports = {
 
   dmg: {
     title: 'Orca ${version}',
-    background: 'assets/dmg-background.png',
     window: { width: 540, height: 380 },
     iconSize: 120,
     contents: [
@@ -85,9 +84,10 @@ module.exports = {
     icon: 'assets/icon.png',
     category: 'Development',
     desktop: {
-      Name: 'Orca',
-      Comment: 'AI workstream orchestration dashboard',
+      entry: {
+        Name: 'Orca',
+        Comment: 'AI workstream orchestration dashboard',
+      },
     },
   },
 };
-

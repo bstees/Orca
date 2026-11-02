@@ -38,7 +38,7 @@ AI sessions communicate via **MCP (Model Context Protocol)** tools. When a sessi
 ## Requirements
 
 - **Node.js ≥ 22** (see `.nvmrc` — use `nvm use` to switch)
-- **Yarn** (`corepack enable` or `npm i -g yarn`)
+- **Yarn 4** (Corepack uses the pinned version from `package.json`; run `corepack enable` if needed)
 - **ntfy.sh** — free push notifications. Subscribe to your topic on the [ntfy app](https://ntfy.sh/app) or any ntfy client.
 
 ---
