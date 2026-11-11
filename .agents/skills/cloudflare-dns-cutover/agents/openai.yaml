@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cloudflare DNS Cutover"
+  short_description: "Move a domain's DNS to Cloudflare without breaking mail"
+  default_prompt: "Use $cloudflare-dns-cutover to snapshot, migrate, and verify this domain's DNS on Cloudflare."
