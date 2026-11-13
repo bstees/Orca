@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Button } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { WifiHigh, WifiNone, WifiMedium } from 'phosphor-react-native';
 import { useOrcaSocket } from './hooks/useOrcaSocket.js';
@@ -7,7 +7,7 @@ import { useSessions } from './hooks/useSessions.js';
 import { useNotifications } from './hooks/useNotifications.js';
 import { SessionsList } from './components/SessionsList.jsx';
 
-// Point this at your Orca server. On a physical device, use your Mac's LAN IP.
+// Remote devices require a trusted HTTPS certificate and one-time pairing.
 // On iOS Simulator, localhost works fine.
 const ORCA_WS_URL = process.env.EXPO_PUBLIC_ORCA_WS_URL ?? 'ws://localhost:7337/ws/dashboard';
 
@@ -24,8 +24,32 @@ const STATUS_ICON = {
 };
 
 export default function App() {
-  const socket = useOrcaSocket(ORCA_WS_URL);
-  const { sessions } = useSessions(socket);
+  const remote = ORCA_WS_URL.startsWith('wss://');
+  const pairRequest = useRef(0);
+  useEffect(() => () => { pairRequest.current++; }, []);
+  const [token, setToken] = useState(null);
+  const [code, setCode] = useState('');
+  const [pairError, setPairError] = useState('');
+  const [pairingBusy, setPairingBusy] = useState(false);
+  const safeLocal = /^ws:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//.test(ORCA_WS_URL);
+  const socket = useOrcaSocket(ORCA_WS_URL, { token, enabled: remote ? !!token : safeLocal });
+  const pair = async () => {
+    if (pairingBusy) return;
+    const requestId = ++pairRequest.current;
+    setPairingBusy(true); setPairError('');
+    try {
+      const origin = ORCA_WS_URL.replace(/^wss:/, 'https:').replace(/\/ws\/dashboard$/, '');
+      const response = await fetch(`${origin}/api/pair`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: code.trim() }) });
+      if (!response.ok) throw new Error('Pairing failed');
+      const result = await response.json();
+      if (!/^[\w-]{43}$/.test(result.token)) throw new Error('Invalid pairing response');
+      if (requestId !== pairRequest.current) return;
+      setToken(result.token); setCode('');
+    } catch { if (requestId === pairRequest.current) setPairError('Pairing failed. Check TLS and generate a fresh local code.'); }
+    finally { if (requestId === pairRequest.current) setPairingBusy(false); }
+  };
+  const sessionState = useSessions(socket);
+  const sessions = remote && !socket.connected ? [] : sessionState.sessions;
   useNotifications({ lastMessage: socket.lastMessage, send: socket.send });
 
   const [refreshing, setRefreshing] = useState(false);
@@ -49,10 +73,6 @@ export default function App() {
     socket.send({ type: 'user_prompt', sessionId, prompt });
   }, [socket.send]);
 
-  const handleApprovalModeChange = useCallback((sessionId, approvalMode) => {
-    socket.send({ type: 'set_approval_mode', sessionId, approvalMode });
-  }, [socket.send]);
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
@@ -66,7 +86,15 @@ export default function App() {
           {STATUS_LABEL[socket.socketStatus] ?? 'Connecting…'}
         </Text>
       </View>
-      <SessionsList sessions={sessions} onRespond={handleRespond} onDismiss={handleDismiss} onPrompt={handlePrompt} onApprovalModeChange={handleApprovalModeChange} refreshing={refreshing} onRefresh={handleRefresh} />
+      {remote && <View>
+        <Text style={{ color: 'white' }}>Pairing grants session control, not editor permissions.</Text>
+        <TextInput accessibilityLabel="One-time pairing code" secureTextEntry value={code} onChangeText={setCode} autoCapitalize="none" style={{ color: 'white' }} />
+        <Button title="Pair device" onPress={pair} disabled={pairingBusy} />
+        <Text style={{ color: 'white' }}>{pairError}</Text>
+        {token && <Button title="Forget this session" onPress={() => { pairRequest.current++; setPairingBusy(false); setToken(null); setCode(''); }} />}
+      </View>}
+      {!remote && !safeLocal && <Text>Remote access requires a wss:// address.</Text>}
+      <SessionsList sessions={sessions} onRespond={handleRespond} onDismiss={handleDismiss} onPrompt={handlePrompt} refreshing={refreshing} onRefresh={handleRefresh} />
     </SafeAreaView>
   );
 }

@@ -28,7 +28,8 @@ function createServerBridge(opts = {}) {
   const {
     port = parseInt(process.env.ORCA_PORT ?? '7337', 10),
     dbPath = process.env.ORCA_DB_PATH ?? path.join(process.env.HOME ?? '.', 'orca.db'),
-    ntfyTopic = process.env.NTFY_TOPIC ?? 'orca-alerts',
+    ntfyTopic = process.env.NTFY_TOPIC ?? '',
+    ntfyToken = process.env.NTFY_TOKEN ?? '',
     ntfyBaseUrl = process.env.NTFY_BASE_URL ?? 'https://ntfy.sh',
   } = opts;
 
@@ -74,12 +75,18 @@ function createServerBridge(opts = {}) {
         port,
         host: '127.0.0.1',
         dbPath,
-        ntfy: { baseUrl: ntfyBaseUrl, topic: ntfyTopic },
+        ntfy: { baseUrl: ntfyBaseUrl, topic: ntfyTopic, token: ntfyToken },
         appDistPath,
+        remote: process.env.ORCA_REMOTE_ORIGIN ? {
+          origin: process.env.ORCA_REMOTE_ORIGIN, host: process.env.ORCA_REMOTE_HOST ?? '0.0.0.0',
+          port: parseInt(process.env.ORCA_REMOTE_PORT ?? '7443', 10),
+          certPath: process.env.ORCA_TLS_CERT, keyPath: process.env.ORCA_TLS_KEY, appDistPath,
+        } : null,
       };
 
       fastify = await createApp(config);
       await fastify.listen({ port: config.port, host: config.host });
+      if (fastify.remote) await fastify.remote.app.listen({ port: config.remote.port, host: config.remote.host });
 
       const address = fastify.server.address();
       return { port: address.port, external: false };

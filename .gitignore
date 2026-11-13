@@ -45,3 +45,8 @@ packages/desktop/assets/icon.ico
 packages/desktop/assets/icon.icns
 packages/desktop/assets/trayIconTemplate.png
 packages/desktop/assets/trayIconTemplate@2x.png
+
+# Runtime SQLite data is never source material
+*.db
+*.db-wal
+*.db-shm
