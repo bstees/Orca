@@ -1,5 +1,14 @@
 import { SESSION_STATUS } from '@orca/shared';
 
+export function validDashboardMessage(msg) {
+  if (!msg || typeof msg !== 'object' || Array.isArray(msg)) return false;
+  if (typeof msg.sessionId !== 'string' || !msg.sessionId || msg.sessionId.length > 128) return false;
+  const fields = { alert_response: 'option', user_prompt: 'prompt', set_approval_mode: 'approvalMode', session_dismissed: null };
+  if (typeof msg.type !== 'string' || !Object.hasOwn(fields, msg.type)) return false;
+  const field = fields[msg.type];
+  return !field || (typeof msg[field] === 'string' && msg[field].length > 0 && msg[field].length <= 4096);
+}
+
 /**
  * WebSocket plugin — registers /ws/extension and /ws/dashboard endpoints.
  *
@@ -9,7 +18,7 @@ import { SESSION_STATUS } from '@orca/shared';
  * @param {import('fastify').FastifyInstance} fastify
  * @param {{ registry: import('../registry/sessions.js').SessionRegistry }} opts
  */
-export async function websocketPlugin(fastify, { registry, events, notifier }) {
+export async function websocketPlugin(fastify, { registry, events, notifier, dashboardOnly = false, onDashboardSocket, authorizeDashboardMessage, messageLimit = Infinity }) {
   const dashboardClients = new Set();
   const extensionSockets = new Map(); // sessionId → socket
 
@@ -33,7 +42,7 @@ export async function websocketPlugin(fastify, { registry, events, notifier }) {
     broadcast({ type: 'approval_mode_changed', sessionId: session.sessionId, approvalMode: session.approvalMode, ts: Date.now() });
   });
 
-  fastify.get('/ws/extension', { websocket: true }, (socket) => {
+  if (!dashboardOnly) fastify.get('/ws/extension', { websocket: true }, (socket) => {
     socket.on('message', (raw) => {
       let msg;
       try {
@@ -95,7 +104,10 @@ export async function websocketPlugin(fastify, { registry, events, notifier }) {
     });
   });
 
-  fastify.get('/ws/dashboard', { websocket: true }, (socket) => {
+  fastify.get('/ws/dashboard', { websocket: true }, (socket, request) => {
+    onDashboardSocket?.(socket, request);
+    let windowStart = Date.now();
+    let messageCount = 0;
     dashboardClients.add(socket);
 
     // Send current session list on connect
@@ -106,6 +118,9 @@ export async function websocketPlugin(fastify, { registry, events, notifier }) {
     }));
 
     socket.on('message', (raw) => {
+      if (authorizeDashboardMessage && !authorizeDashboardMessage(request)) { socket.close(4001, 'Pairing expired or revoked'); return; }
+      if (Date.now() - windowStart > 10000) { windowStart = Date.now(); messageCount = 0; }
+      if (++messageCount > messageLimit) { socket.close(4008, 'Rate limit'); return; }
       let msg;
       try {
         msg = JSON.parse(raw.toString());
@@ -113,6 +128,9 @@ export async function websocketPlugin(fastify, { registry, events, notifier }) {
         return;
       }
 
+      if (!validDashboardMessage(msg)) return;
+      try {
+      if (msg.type !== 'set_approval_mode' && registry.get && !registry.get(msg.sessionId)) return;
       const { type, sessionId, option } = msg;
 
       if (type === 'alert_response' && sessionId && option) {
@@ -131,18 +149,20 @@ export async function websocketPlugin(fastify, { registry, events, notifier }) {
           message: option,
           tags: ['white_check_mark'],
           priority: 'default',
+        })?.catch(() => {
+          fastify.log?.warn('Notification delivery failed; response was retained');
         });
       } else if (type === 'set_approval_mode' && sessionId && msg.approvalMode) {
-        registry.updateApprovalMode(sessionId, msg.approvalMode);
-        const extSocket = extensionSockets.get(sessionId);
-        if (extSocket?.readyState === 1 /* OPEN */) {
-          extSocket.send(JSON.stringify({ type: 'set_approval_mode', approvalMode: msg.approvalMode, ts: Date.now() }));
-        }
+        socket.send(JSON.stringify({ type: 'error', code: 'LOCAL_APPROVAL_REQUIRED',
+          message: 'Change approval permissions directly in your editor.' }));
       } else if (type === 'user_prompt' && sessionId && msg.prompt) {
         registry.updateStatus(sessionId, SESSION_STATUS.WORKING, `📱 ${msg.prompt}`);
       } else if (type === 'session_dismissed' && sessionId) {
         registry.remove(sessionId);
         broadcast({ type: 'session_removed', sessionId, ts: Date.now() });
+      }
+      } catch {
+        fastify.log?.warn('Rejected dashboard message');
       }
     });
 

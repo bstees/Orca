@@ -119,12 +119,13 @@ All server options are set via environment variables:
 | `ORCA_HOST`     | `127.0.0.1`       | Bind address                                 |
 | `ORCA_DB_PATH`  | `./orca.db`       | SQLite database path                         |
 | `NTFY_BASE_URL` | `https://ntfy.sh` | ntfy server URL (self-host supported)        |
-| `NTFY_TOPIC`    | `orca-alerts`     | ntfy topic — subscribe to this on your phone |
+| `NTFY_TOKEN` | empty (disabled) | Bearer token for private notification destination |
+| `NTFY_TOPIC`    | empty (disabled) | Explicit private topic; requires `NTFY_TOKEN` |
 
 Example — custom topic and self-hosted ntfy:
 
 ```bash
-NTFY_TOPIC=my-personal-alerts NTFY_BASE_URL=https://ntfy.example.com yarn dev
+NTFY_TOPIC=my-personal-alerts NTFY_TOKEN=<token> NTFY_BASE_URL=https://ntfy.example.com yarn dev
 ```
 
 ---
@@ -281,3 +282,48 @@ orca/
 | Testing         | [Jest 30](https://jestjs.io) · [Testing Library](https://testing-library.com) · [Stryker](https://stryker-mutator.io)                                              |
 | Language        | Plain JavaScript — no TypeScript                                                                                                                                   |
 | Package manager | [Yarn workspaces](https://yarnpkg.com/features/workspaces)                                                                                                         |
+
+## Security and remote access
+
+The default local service remains loopback-only for trusted single-user extension/MCP access. Remote dashboard access is an **explicitly enabled, separate HTTPS listener**, not a broad bind of the local service. Remote devices can see and control sessions (respond, prompt and dismiss), but cannot connect as extensions, use MCP tools, or change editor approval permissions. This is single-owner device pairing, not multi-user tenant isolation.
+
+### Enable secure remote/mobile access
+
+Obtain a TLS certificate trusted by your phone/browser and matching a DNS hostname you control. Supply its certificate and private-key files; never commit them. Certificate provisioning, firewall changes and DNS changes are not performed by Orca. Do not bypass certificate warnings.
+
+```sh
+ORCA_REMOTE_ORIGIN=https://orca.example.com:7443 \
+ORCA_TLS_CERT=/secure/path/fullchain.pem \
+ORCA_TLS_KEY=/secure/path/private-key.pem \
+yarn dev
+```
+
+Optional `ORCA_REMOTE_PORT` defaults to `7443` and `ORCA_REMOTE_HOST` to `0.0.0.0`. `ORCA_REMOTE_ORIGIN` must exactly match the hostname and port users open. TLS terminates in Orca; this release does not trust forwarded headers or support a plaintext reverse-proxy mode. Keep the local port 7337 private. Ensure the built dashboard exists with `yarn workspace @orca/app build`.
+
+Generate a one-time code from the trusted local machine:
+
+```sh
+curl -X POST http://127.0.0.1:7337/api/remote/pairing
+```
+
+Open the configured HTTPS origin on your phone/browser and enter the code. It expires in five minutes, succeeds once, and locks after five failed attempts. A failed/lost pairing response requires a fresh code. Never send codes to an untrusted person: pairing authorizes session control. A hostile requester can exhaust attempts; create a new code locally if that happens.
+
+Native mobile uses `EXPO_PUBLIC_ORCA_WS_URL=wss://orca.example.com:7443/ws/dashboard`, then the in-app pairing form. This variable is a public endpoint, not a secret. Never place credentials in build-time public variables or query strings. Physical devices must use a trusted certificate and matching hostname, not an insecure LAN IP.
+
+Paired tokens live only in app memory, expire after 12 hours, and are invalidated on server restart. Refreshing/restarting the client requires pairing again. Tokens are sent only over HTTPS/WSS, via Authorization headers or the WebSocket subprotocol header, never URLs. Do not log these headers in any intermediary. “Forget this session” disconnects and forgets the local credential; to revoke all issued credentials and active connections, run:
+
+```sh
+curl -X POST http://127.0.0.1:7337/api/remote/revoke
+```
+
+Remote browser origins and Host values must exactly match the configured origin. Native clients without Origin still require a valid credential. Remote WebSockets have bounded payload and message rates; pairing has bounded attempts. Revocation/expiry closes active remote connections, and every control message rechecks authorization. No unconfirmed remote global editor permission changes are allowed; change permissions directly in VS Code.
+
+### Boundaries and limitations
+
+Local processes and the local account remain trusted; Host/Origin checks are not authentication for malicious local software. HTTPS protects transport, not a compromised phone, browser extension, certificate key or pairing recipient. Authenticated remote users are trusted to see and act on all sessions. This has automated coverage, not a penetration-test certification. Native-device and packaged-desktop testing remain release gates.
+
+### Notifications and runtime data
+
+Notifications are disabled unless both `NTFY_TOPIC` and `NTFY_TOKEN` are set. Use a private access-controlled topic on a trusted HTTPS ntfy service; a random topic name alone is not privacy. Notification message content leaves your machine and is sent to that provider. Never commit the token.
+
+Runtime SQLite databases and sidecars are ignored. Removing the formerly tracked database from the current tree does not remove Git history. Review prior contents separately before deciding whether history cleanup or credential rotation is necessary. Use synthetic fixtures for demos.

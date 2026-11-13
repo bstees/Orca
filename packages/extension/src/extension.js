@@ -29,16 +29,7 @@ async function activate(context) {
     statusBar.update(connected ? 'connected' : 'disconnected');
   });
 
-  // Handle incoming messages from server (e.g. set_approval_mode from dashboard)
-  orcaClient.onMessage((msg) => {
-    if (msg.type === 'set_approval_mode' && msg.approvalMode) {
-      vscode.workspace.getConfiguration('chat').update(
-        'permissions.default',
-        msg.approvalMode,
-        vscode.ConfigurationTarget.Global
-      );
-    }
-  });
+  // Permission changes are local editor actions, never remote server commands.
 
   // Re-send session_registered on every connect (initial + reconnects after server restart).
   // Must be registered BEFORE connect() so the handler is in place when the socket opens.
