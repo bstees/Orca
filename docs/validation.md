@@ -15,7 +15,7 @@ The server suites include local and remote authorization boundaries. Passing the
 
 - **Lint:** not part of this workflow yet. A November 18, 2026 baseline run found 395 existing lint errors after removing an incompatible blanket `brace-expansion` major-version override. Most were formatting errors; they are not suppressed or presented as passing. Run `yarn lint` to inspect current results and clean up this baseline in a dedicated change before adding a lint gate.
 - **Native devices and desktop packaging:** validate pairing, TLS trust, notification behavior, reconnects and packaged Electron behavior on real target platforms. Mocked mobile tests and web/extension builds do not cover these.
-- **Mutation testing:** run `yarn mutate` separately; this workflow does not attest to the README's historical mutation scores.
+- **Mutation testing:** run `yarn mutate` separately; this workflow does not measure or attest to a mutation score.
 - **Runtime-data history:** the previously tracked database is absent from the current tree but remains in history. Review it separately before deciding whether cleanup or credential rotation is needed. This workflow does not rewrite history.
 
 ## Local reproduction
