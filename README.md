@@ -1,10 +1,14 @@
 # Orca
 
-> AI workstream orchestration — track multiple AI coding sessions from a single dashboard, get push notifications when they need your input.
+> A personal workflow tool and engineering case study for keeping parallel AI coding sessions visible.
 
 ## Review in two minutes
 
-Built by [Brent Stees](https://brentstees.com/) to keep parallel AI coding work visible and human decisions explicit. Orca connects MCP session tools, a real-time React dashboard, a VS Code extension and optional paired remote clients.
+I built Orca to keep my parallel AI coding sessions visible and make it easier to respond when they needed input. It addressed a gap in my own workflow before the tools I used offered comparable visibility.
+
+It brings together MCP integration, a real-time React dashboard, a VS Code extension, and an experimental React Native companion. I retain it as a practical demonstration of cross-platform architecture, session-state coordination, and explicit local/remote trust boundaries.
+
+Built by [Brent Stees](https://brentstees.com/).
 
 | Engineering decision | Inspect the evidence |
 | --- | --- |
@@ -18,7 +22,7 @@ Built by [Brent Stees](https://brentstees.com/) to keep parallel AI coding work 
 
 When you run several AI coding sessions in parallel (e.g., one per feature branch), it's hard to know which ones are blocked, which are still working, and which need a decision from you.
 
-Orca solves this with three moving parts:
+The core workflow connects three parts:
 
 | Part                  | What it does                                                           |
 | --------------------- | ---------------------------------------------------------------------- |
@@ -26,7 +30,7 @@ Orca solves this with three moving parts:
 | **VS Code Extension** | Registers itself with the server, reports status & idle detection      |
 | **Dashboard**         | Real-time React web UI — see all sessions at a glance                  |
 
-AI sessions communicate via **MCP (Model Context Protocol)** tools. When a session needs your input it calls `orca_request_input`, which fires a push notification to your phone (via [ntfy.sh](https://ntfy.sh)) and shows a banner in the dashboard.
+AI sessions communicate via **MCP (Model Context Protocol)** tools. When a session needs your input it calls `orca_request_input`, which shows a banner in the dashboard. Optional phone alerts use [ntfy.sh](https://ntfy.sh) or a self-hosted ntfy service and require explicit private-topic and token configuration; see [notification setup and privacy](#notifications-and-runtime-data).
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -45,13 +49,20 @@ AI sessions communicate via **MCP (Model Context Protocol)** tools. When a sessi
 └─────────────────────────────────────────────────────┘
 ```
 
+### Experimental mobile companion
+
+The [React Native companion](packages/mobile/src/App.jsx) includes session viewing, responses and prompts, and a pairing UI for remote connections. Its [component and hook tests](packages/mobile/src/__tests__) run with native mocks. Physical-device pairing, reconnection, and notification delivery still need validation; these tests are not an end-to-end mobile release check.
+
+The companion schedules local notifications from received session events. That is separate from server-to-phone ntfy delivery and does not establish background delivery while the app is suspended. Expo push-token registration code is present, but this checkout has no EAS project ID configured and no server handling for the `push_token` message. Native background push is not a completed or validated feature. See the full [validation scope](docs/validation.md).
+
+
 ---
 
 ## Requirements
 
 - **Node.js ≥ 22** (see `.nvmrc` — use `nvm use` to switch)
 - **Yarn 4** (Corepack uses the pinned version from `package.json`; run `corepack enable` if needed)
-- **ntfy.sh** — free push notifications. Subscribe to your topic on the [ntfy app](https://ntfy.sh/app) or any ntfy client.
+- **ntfy (optional)**: for phone alerts, configure a private topic and token on a trusted HTTPS ntfy service, then subscribe using the [ntfy app](https://ntfy.sh/app) or another client. See [notification setup and privacy](#notifications-and-runtime-data).
 
 ---
 
@@ -182,7 +193,7 @@ Valid statuses: `registered` · `working` · `idle` · `blocked` · `needs_input
 
 #### `orca_request_input`
 
-Call when you need a human decision before continuing. Triggers a push notification and dashboard banner. **Stop and wait** after calling — do not loop.
+Call when you need a human decision before continuing. Shows a dashboard banner and, when ntfy is configured, sends a phone alert. **Stop and wait** after calling — do not loop.
 
 ```json
 {
@@ -244,7 +255,7 @@ yarn workspace @orca/shared mutate
 yarn workspace @orca/app mutate
 ```
 
-Target: ≥ 80% mutation score. Current scores: `shared` 100% · `app` 98%.
+Target: ≥ 80% mutation score. Run the commands above to measure the current checkout; the Verify workflow does not run mutation testing.
 
 ### Storybook
 
