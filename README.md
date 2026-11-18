@@ -2,6 +2,18 @@
 
 > AI workstream orchestration — track multiple AI coding sessions from a single dashboard, get push notifications when they need your input.
 
+## Review in two minutes
+
+Built by [Brent Stees](https://brentstees.com/) to keep parallel AI coding work visible and human decisions explicit. Orca connects MCP session tools, a real-time React dashboard, a VS Code extension and optional paired remote clients.
+
+| Engineering decision | Inspect the evidence |
+| --- | --- |
+| Keep orchestration separate from human decisions | [MCP tool implementation and tests](packages/server/src/mcp), [session-state hook](packages/app/src/hooks/useSessions.js) |
+| Separate trusted local integrations from paired remote access | [Security boundaries](#security-and-remote-access), [remote authorization tests](packages/server/src/remote-auth.test.js), [WebSocket security tests](packages/server/src/plugins/websocket.security.test.js) |
+| Make behavior repeatable without live AI sessions | [Synthetic fixtures](packages/shared/src/fixtures.js), [demo-mode instructions](#3--try-demo-mode-no-server-needed), [verification workflow](.github/workflows/verify.yml) |
+
+[View verification runs](https://github.com/bstees/Orca/actions/workflows/verify.yml). The workflow checks unit tests, mobile tests and web/extension builds, not device deployment or a security certification. See [validation scope](docs/validation.md) for remaining gates, including lint cleanup and native-device testing.
+
 ## What is Orca?
 
 When you run several AI coding sessions in parallel (e.g., one per feature branch), it's hard to know which ones are blocked, which are still working, and which need a decision from you.
@@ -47,7 +59,7 @@ AI sessions communicate via **MCP (Model Context Protocol)** tools. When a sessi
 
 ```bash
 # Clone and install all workspace dependencies
-git clone <repo-url> orca
+git clone https://github.com/bstees/Orca.git orca
 cd orca
 yarn install
 ```
@@ -208,14 +220,17 @@ Pull at session start for context:
 ### Running tests
 
 ```bash
-# All packages
+# Shared, server, dashboard and extension suites
 yarn test
+
+# Mobile suite (not included in the root Jest projects)
+yarn workspace @orca/mobile test
 
 # Single package
 yarn workspace @orca/shared jest
 yarn workspace @orca/server jest
 yarn workspace @orca/app jest
-yarn workspace @orca/extension jest
+yarn workspace orca-session-manager jest
 ```
 
 ### Mutation testing

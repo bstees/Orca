@@ -1,0 +1,37 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests-and-builds:
+    name: Tests and web/extension builds
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+      - name: Enable pinned Yarn via Corepack
+        run: corepack enable
+      - name: Install locked dependencies
+        run: yarn install --immutable
+      - name: Test shared, server, dashboard and extension
+        run: yarn test --ci --runInBand
+      - name: Test mobile with native mocks
+        run: yarn workspace @orca/mobile test --ci --runInBand
+      - name: Build web dashboard
+        run: yarn workspace @orca/app build
+      - name: Build VS Code extension
+        run: yarn workspace orca-session-manager build

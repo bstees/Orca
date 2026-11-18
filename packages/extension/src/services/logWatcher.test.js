@@ -53,14 +53,16 @@ describe('createLogWatcher', () => {
 
 describe('createLogWatcher idle detection', () => {
   let tmpDir;
+  const watchers = [];
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    jest.useFakeTimers({ now: new Date('2026-01-01T00:00:00Z') });
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'orca-idle-'));
     jest.spyOn(os, 'homedir').mockReturnValue(tmpDir);
   });
 
   afterEach(() => {
+    watchers.splice(0).forEach((watcher) => watcher.stop());
     jest.restoreAllMocks();
     jest.useRealTimers();
     fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -74,6 +76,7 @@ describe('createLogWatcher idle detection', () => {
     jest.resetModules();
     const { createLogWatcher } = require('./logWatcher.js');
     const watcher = createLogWatcher({ idleSeconds, onIdle });
+    watchers.push(watcher);
     watcher.start();
 
     jest.advanceTimersByTime(idleSeconds * 1000 + 100);
@@ -85,14 +88,18 @@ describe('createLogWatcher idle detection', () => {
   it('does not fire onIdle when log file was recently modified', () => {
     const onIdle = jest.fn();
     const idleSeconds = 5;
-    buildLogTree(tmpDir); // default mtime = now
+    const logFile = buildLogTree(tmpDir, { mtime: Date.now() });
 
     jest.resetModules();
     const { createLogWatcher } = require('./logWatcher.js');
     const watcher = createLogWatcher({ idleSeconds, onIdle });
+    watchers.push(watcher);
     watcher.start();
 
-    jest.advanceTimersByTime(idleSeconds * 1000 + 100);
+    // Refresh the file just before the scheduled check, using the same clock.
+    jest.advanceTimersByTime(4_000);
+    fs.utimesSync(logFile, Date.now() / 1000, Date.now() / 1000);
+    jest.advanceTimersByTime(1_100);
 
     expect(onIdle).not.toHaveBeenCalled();
     watcher.stop();
@@ -106,6 +113,7 @@ describe('createLogWatcher idle detection', () => {
     jest.resetModules();
     const { createLogWatcher } = require('./logWatcher.js');
     const watcher = createLogWatcher({ idleSeconds, onIdle });
+    watchers.push(watcher);
     watcher.start();
 
     // Advance twice the interval — the same stale mtime, so onIdle fires once
@@ -122,6 +130,7 @@ describe('createLogWatcher idle detection', () => {
     jest.resetModules();
     const { createLogWatcher } = require('./logWatcher.js');
     const watcher = createLogWatcher({ idleSeconds: 5, onIdle });
+    watchers.push(watcher);
     watcher.start(); // findLogFile returns null → early return
 
     jest.advanceTimersByTime(10_000);
